@@ -4,9 +4,11 @@ import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+parser.add_argument("-i", "--interval", type=int, default=1, help="Update interval in seconds")
 args = parser.parse_args()
 
 print("ts-pmo - v1.0")
+interval = args.interval
 
 if args.verbose:
     print("======= CPU =======")
@@ -93,7 +95,7 @@ if args.verbose:
             flush=True,
         )
 
-        time.sleep(1)
+        time.sleep(interval)
 
 else:
     print("Verbose mode is off. Use -v for more details.")
@@ -163,4 +165,4 @@ else:
             flush=True,
         )
 
-        time.sleep(1)
+        time.sleep(interval)
