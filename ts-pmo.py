@@ -11,10 +11,34 @@ parser.add_argument("--cpu-threshold", type=int, help="CPU usage threshold perce
 parser.add_argument(
     "--mem-threshold", type=int, help="Memory usage threshold percentage"
 )
+parser.add_argument(
+    "--log-temps", action="store_true", help="Log temperature data to output file"
+)
+
 args = parser.parse_args()
 
-print("ts-pmo - v1.0")
+print("ts-pmo 'This System Python Monitor' - v1.0")
+print()
+
 interval = args.interval
+
+
+def temp_Builder(temps):
+    output = ""
+    global tempLines
+    tempLines = 0
+    for name, entries in temps.items():
+        if name == "coretemp":
+            for entry in entries:
+                output += "    {:<20} {} °C (high = {} °C, critical = {} °C)\n".format(
+                    entry.label or name,
+                    entry.current,
+                    entry.high,
+                    entry.critical,
+                )
+                tempLines += 1
+    return output
+
 
 if args.cpu_threshold or args.mem_threshold is not None:
     if args.verbose:
@@ -32,6 +56,8 @@ if args.cpu_threshold or args.mem_threshold is not None:
                 ),
                 end="",
             )
+            if args.log_temps:
+                print("Logging Temperatures")
             print()
             file.write(
                 "Threshold: CPU Usage > {}%\n".format(args.cpu_threshold)
@@ -41,6 +67,12 @@ if args.cpu_threshold or args.mem_threshold is not None:
             file.write(
                 "Threshold: Memory Usage > {}%\n".format(args.mem_threshold)
                 if args.mem_threshold
+                else ""
+            )
+            file.write("\n")
+            file.write(
+                "Log Temperatures: {}\n".format(args.log_temps)
+                if args.log_temps
                 else ""
             )
             file.write("\n")
@@ -81,6 +113,14 @@ if args.cpu_threshold or args.mem_threshold is not None:
             file.write("\n")
 
 if args.verbose:
+    tempLines = 0
+    if hasattr(psutil, "sensors_temperatures"):
+        temps = psutil.sensors_temperatures()
+        for name, entries in temps.items():
+            if name == "coretemp":
+                tempLines = len(entries)
+                break
+
     print("======= CPU =======")
     print()
     print("======= Memory =======")
@@ -88,6 +128,12 @@ if args.verbose:
     print("======= Disk =======")
     print()
     print("======= Network =======")
+    if hasattr(psutil, "sensors_temperatures"):
+        print()
+        print("======= CPU Temperature =======")
+        for _ in range(tempLines):
+            print()
+        print()
 
     while True:
         cpu_percent = psutil.cpu_percent()
@@ -111,19 +157,29 @@ if args.verbose:
         packets_sent = network.packets_sent
         packets_recv = network.packets_recv
 
+        if hasattr(psutil, "sensors_temperatures"):
+            temps = psutil.sensors_temperatures()
+            output = temp_Builder(temps)
+
         # Log to File
         if (args.cpu_threshold and cpu_percent > args.cpu_threshold) or (
             args.mem_threshold and mem_percent > args.mem_threshold
         ):
             with open("log.txt", "a") as file:
                 formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-                file.write(
-                    f"{formatted_time}, {cpu_percent}%, {mem_percent}%, {packets_sent/1000:.2f}, {packets_recv/1000:.2f}\n"
-                )
+                if args.log_temps and hasattr(psutil, "sensors_temperatures"):
+                    file.write(
+                        f"{formatted_time}, {cpu_percent}%, {mem_percent}%, {packets_sent/1000:.2f}, {packets_recv/1000:.2f}, Temperatures: \n{output}\n"
+                    )
+                else:
+                    file.write(
+                        f"{formatted_time}, {cpu_percent}%, {mem_percent}%, {packets_sent/1000:.2f}, {packets_recv/1000:.2f}\n"
+                    )
 
-        # Move up 6 lines to CPU data
+        # Move up lines to CPU data
+        total = 9 + tempLines
         print(
-            "\033[6F",
+            f"\033[{total}F",
             end="",
         )
         print(
@@ -163,7 +219,7 @@ if args.verbose:
             end="",
         )
 
-        # Move down 2 lines to Sensor Data
+        # Move down 2 lines to Network Data
         print("\033[2E", end="")
         print(
             "\r\033[2K",
@@ -171,6 +227,17 @@ if args.verbose:
         )
         print(
             f"Packets Sent: {packets_sent}  |  Packets Received: {packets_recv}  |  Bytes Sent: {bytes_sent}  | Bytes Received: {bytes_recv}",
+            end="",
+        )
+
+        # Move down 2 lines to Temperature Data
+        print("\033[2E", end="")
+        print(
+            "\r\033[2K",
+            end="",
+        )
+        print(
+            f"Temperatures: \n{output}",
             end="",
             flush=True,
         )
