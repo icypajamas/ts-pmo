@@ -134,6 +134,8 @@ if args.verbose:
         for _ in range(tempLines):
             print()
         print()
+    else:
+        print()
 
     while True:
         cpu_percent = psutil.cpu_percent()
@@ -177,7 +179,10 @@ if args.verbose:
                     )
 
         # Move up lines to CPU data
-        total = 9 + tempLines
+        if hasattr(psutil, "sensors_temperatures"): 
+            total = 9 + tempLines
+        else:
+            total = 7
         print(
             f"\033[{total}F",
             end="",
@@ -215,7 +220,7 @@ if args.verbose:
             end="",
         )
         print(
-            f"Free Percent: {disk_percent}%  |  Total: {disk_total:.2f} GB  |  Available: {disk_avail:.2f} GB",
+            f"Disk Usage: {disk_percent}%  |  Total: {disk_total:.2f} GB  |  Available: {disk_avail:.2f} GB",
             end="",
         )
 
@@ -230,18 +235,21 @@ if args.verbose:
             end="",
         )
 
-        # Move down 2 lines to Temperature Data
-        print("\033[2E", end="")
-        print(
-            "\r\033[2K",
-            end="",
-        )
-        print(
-            f"Temperatures: \n{output}",
-            end="",
-            flush=True,
-        )
+        if hasattr(psutil, "sensors_temperatures"):
+            # Move down 2 lines to Temperature Data
+            print("\033[2E", end="")
+            print(
+                "\r\033[2K",
+                end="",
+            )
+            print(
+                f"Temperatures: \n{output}",
+                end="",
+                flush=True,
+            )
 
+        else:
+            print(flush=True)
         time.sleep(interval)
 
 else:
@@ -315,7 +323,7 @@ else:
             end="",
         )
         print(
-            f"Free Percent: {disk_percent}%  |  Total: {disk_total:.2f} GB  |  Available: {disk_avail:.2f} GB",
+            f"Disk Usage: {disk_percent}%  |  Total: {disk_total:.2f} GB  |  Available: {disk_avail:.2f} GB",
             end="",
             flush=True,
         )
