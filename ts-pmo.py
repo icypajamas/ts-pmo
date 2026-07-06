@@ -40,7 +40,7 @@ def temp_Builder(temps):
     return output
 
 
-if args.cpu_threshold or args.mem_threshold is not None:
+if args.cpu_threshold is not None or args.mem_threshold is not None:
     if args.verbose:
         with open("log.txt", "w") as file:
             print(
