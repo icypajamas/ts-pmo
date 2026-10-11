@@ -6,19 +6,22 @@ Compatible with Linux and Windows.
 
 ```bash
 python3 -m venv venv
-
+```
 On Windows:
 
+```bash
 venv/Scripts/activate
 
 python3 ts-pmo.py
+```
 
 On Linux:
 
+```bash
 source venv/bin/activate
 
 python3 ts-pmo.py
-
+```
 
 Options:
 
@@ -27,8 +30,10 @@ Options:
 
 Example Usage:
 
+```bash
 python3 ts-pmo.py -v -i 3
 
 (Verbose output with updates after 3 seconds)
+```
 
 Not the final version. Improvements soon.
