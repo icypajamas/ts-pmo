@@ -1,18 +1,22 @@
-CLI Tool to monitor system resources. Compatible with Linux and Windows. 
+# CLI Tool to monitor system resources
 
+Compatible with Linux and Windows.
 
-Usage:
+## Usage
 
+```bash
 python3 -m venv venv
 
 On Windows:
 
 venv/Scripts/activate
+
 python3 ts-pmo.py
 
 On Linux:
 
 source venv/bin/activate
+
 python3 ts-pmo.py
 
 
@@ -24,6 +28,7 @@ Options:
 Example Usage:
 
 python3 ts-pmo.py -v -i 3
+
 (Verbose output with updates after 3 seconds)
 
 Not the final version. Improvements soon.
