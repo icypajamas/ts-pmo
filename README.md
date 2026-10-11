@@ -26,6 +26,7 @@ python3 ts-pmo.py
 Options:
 
 -v = Verbose Output Network information (Linux & Windows) and Temperature information (Linux Only)
+
 -i = Set Update interval
 
 Example Usage:
